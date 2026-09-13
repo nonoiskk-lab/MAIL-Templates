@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { exchangeOutlookCode } from "@/lib/outlook/oauth";
 import { encryptToken } from "@/lib/security/crypto";
+import { getSiteUrlOrFallback } from "@/lib/site-url";
 
 export async function GET(request: Request) {
   const url = new URL(request.url);
@@ -27,7 +28,7 @@ export async function GET(request: Request) {
   }
 
   try {
-    const tokens = await exchangeOutlookCode(process.env.NEXT_PUBLIC_SITE_URL ?? origin, code);
+    const tokens = await exchangeOutlookCode(getSiteUrlOrFallback(origin), code);
     const expiresAt = new Date(Date.now() + tokens.expiresIn * 1000).toISOString();
 
     await supabase.from("email_connections").upsert(

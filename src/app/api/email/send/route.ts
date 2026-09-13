@@ -6,6 +6,7 @@ import { sendGmailMessage } from "@/lib/gmail/oauth";
 import { sendOutlookMessage } from "@/lib/outlook/oauth";
 import { toSafeErrorResponse } from "@/lib/security/errors";
 import { isSameOrigin } from "@/lib/security/csrf";
+import { getSiteUrlOrFallback } from "@/lib/site-url";
 
 const sendSchema = z.object({
   provider: z.enum(["gmail", "outlook"]),
@@ -48,7 +49,7 @@ export async function POST(request: Request) {
     }
 
     const refreshToken = decryptToken(connection.refresh_token_encrypted);
-    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? new URL(request.url).origin;
+    const siteUrl = getSiteUrlOrFallback(new URL(request.url).origin);
 
     if (parsed.provider === "gmail") {
       await sendGmailMessage({

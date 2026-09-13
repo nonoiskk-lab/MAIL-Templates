@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { randomBytes } from "crypto";
 import { createClient } from "@/lib/supabase/server";
 import { getGmailAuthUrl, isGmailConfigured } from "@/lib/gmail/oauth";
+import { getSiteUrlOrFallback } from "@/lib/site-url";
 
 export async function GET(request: Request) {
   const supabase = await createClient();
@@ -20,7 +21,7 @@ export async function GET(request: Request) {
   }
 
   const state = randomBytes(16).toString("hex");
-  const authUrl = getGmailAuthUrl(process.env.NEXT_PUBLIC_SITE_URL ?? origin, state);
+  const authUrl = getGmailAuthUrl(getSiteUrlOrFallback(origin), state);
 
   const response = NextResponse.redirect(authUrl);
   response.cookies.set("gmail_oauth_state", state, {

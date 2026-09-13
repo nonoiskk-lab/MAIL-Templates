@@ -4,6 +4,7 @@ import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { z } from "zod";
 import { createClient } from "@/lib/supabase/server";
+import { getSiteUrlOrFallback } from "@/lib/site-url";
 
 const emailPasswordSchema = z.object({
   email: z.string().email("Enter a valid email address."),
@@ -15,12 +16,10 @@ export type AuthActionState = {
 } | null;
 
 async function getSiteUrl() {
-  const envUrl = process.env.NEXT_PUBLIC_SITE_URL;
-  if (envUrl) return envUrl;
   const headerList = await headers();
   const host = headerList.get("host");
   const protocol = host?.startsWith("localhost") ? "http" : "https";
-  return `${protocol}://${host}`;
+  return getSiteUrlOrFallback(`${protocol}://${host}`);
 }
 
 export async function signUp(
